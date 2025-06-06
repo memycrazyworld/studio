@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,8 +12,16 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
-import { Wallet } from "lucide-react";
+import { Wallet, UserCircle, LogOut, Tag, Settings, ChevronDown } from "lucide-react";
 
 interface WalletConnectButtonProps {
   onDiscountToggle: (isDiscounted: boolean) => void;
@@ -24,33 +33,41 @@ export function WalletConnectButton({ onDiscountToggle }: WalletConnectButtonPro
   const [uptBalance, setUptBalance] = useState(0);
   const [discountAppliedInternal, setDiscountAppliedInternal] = useState(false);
   const { toast } = useToast();
+  const mockWalletAddress = "So11...1112"; // Shortened for display
 
   useEffect(() => {
-    // Check local storage on mount to restore discount state
+    const storedConnectionStatus = localStorage.getItem("walletConnected") === "true";
+    const storedUptBalance = localStorage.getItem("uptBalance");
     const storedDiscountStatus = localStorage.getItem("discountApplied") === "true";
-    if (storedDiscountStatus) {
-      setDiscountAppliedInternal(true);
-      onDiscountToggle(true); // Notify parent
+
+    if (storedConnectionStatus) {
+      setIsConnected(true);
+      setUptBalance(storedUptBalance ? parseInt(storedUptBalance, 10) : 0);
+      if (storedDiscountStatus) {
+        setDiscountAppliedInternal(true);
+        onDiscountToggle(true);
+      }
     }
-     const storedConnectionStatus = localStorage.getItem("walletConnected") === "true";
-     const storedUptBalance = localStorage.getItem("uptBalance");
-     if (storedConnectionStatus) {
-        setIsConnected(true);
-        setUptBalance(storedUptBalance ? parseInt(storedUptBalance, 10) : 0);
-     }
-
-
   }, [onDiscountToggle]);
-
 
   const handleConnect = () => {
     const newBalance = Math.floor(Math.random() * 500) + 50;
     setIsConnected(true);
-    setUptBalance(newBalance); 
-    setIsDialogOpen(true);
+    setUptBalance(newBalance);
     localStorage.setItem("walletConnected", "true");
     localStorage.setItem("uptBalance", newBalance.toString());
-    toast({ title: "Wallet Connected", description: "Successfully connected to your Uprock wallet." });
+    toast({ title: "Wallet Connected", description: `Successfully connected to your Uprock wallet. Balance: ${newBalance} $UPT` });
+  };
+
+  const handleDisconnect = () => {
+    setIsConnected(false);
+    setUptBalance(0);
+    setDiscountAppliedInternal(false);
+    onDiscountToggle(false);
+    localStorage.removeItem("walletConnected");
+    localStorage.removeItem("uptBalance");
+    localStorage.removeItem("discountApplied");
+    toast({ title: "Wallet Disconnected", description: "You have been successfully disconnected." });
   };
 
   const handleApplyDiscount = () => {
@@ -76,21 +93,51 @@ export function WalletConnectButton({ onDiscountToggle }: WalletConnectButtonPro
     // We don't refund tokens here to simulate them being spent.
     toast({ title: "Discount Removed", description: "The 10% discount has been removed." });
     setIsDialogOpen(false);
-  }
-
-  const openDialog = () => setIsDialogOpen(true);
+  };
 
   if (isConnected) {
     return (
       <>
-        <Button onClick={openDialog} variant={discountAppliedInternal ? "secondary" : "outline"} className={discountAppliedInternal ? "bg-green-600 hover:bg-green-700 text-white" : ""}>
-          <Wallet className="mr-2 h-4 w-4" />
-          {discountAppliedInternal ? "Discount Active" : "Wallet Connected"} ({uptBalance} $UPT)
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button 
+              variant={discountAppliedInternal ? "secondary" : "outline"} 
+              className={`flex items-center ${discountAppliedInternal ? "bg-green-600 hover:bg-green-700 text-white" : "border-primary text-primary hover:bg-primary/10"}`}
+            >
+              <Wallet className="mr-2 h-4 w-4" />
+              <span>{discountAppliedInternal ? "Discount Active" : "Wallet"} ({uptBalance} $UPT)</span>
+              <ChevronDown className="ml-2 h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuLabel>My Wallet ({mockWalletAddress})</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link href="/account" className="flex items-center cursor-pointer">
+                <UserCircle className="mr-2 h-4 w-4" />
+                My Account
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setIsDialogOpen(true)} className="flex items-center cursor-pointer">
+              <Tag className="mr-2 h-4 w-4" />
+              <span>{discountAppliedInternal ? "Manage Discount" : "Apply Discount"}</span>
+            </DropdownMenuItem>
+             <DropdownMenuItem onClick={() => alert("Feature coming soon!")} className="flex items-center cursor-pointer">
+              <Settings className="mr-2 h-4 w-4" />
+              Wallet Settings
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleDisconnect} className="flex items-center text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer">
+              <LogOut className="mr-2 h-4 w-4" />
+              Disconnect
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Uprock Wallet</DialogTitle>
+              <DialogTitle>Uprock Wallet Discount</DialogTitle>
               <DialogDescription>
                 You have {uptBalance} $UPT tokens available.
               </DialogDescription>

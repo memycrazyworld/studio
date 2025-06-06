@@ -47,6 +47,26 @@ const mockDeals: TravelDeal[] = [
     id: "8", type: "activity", destination: "Kyoto, Japan", price: 60, dates: "Any day", rating: 4.9,
     imageUrl: "https://placehold.co/800x600.png", imageHint: "Kyoto temple", description: "Traditional tea ceremony experience in Gion. Immerse yourself in Japanese culture and learn the art of tea making.", activityName: "Tea Ceremony",
     duration: "1.5 Hours"
+  },
+  {
+    id: "9", type: "flight", destination: "Barcelona, Spain", price: 320, originalPrice: 370, dates: "Mar 5 - Mar 12", rating: 4.4,
+    imageUrl: "https://placehold.co/800x600.png", imageHint: "Barcelona SagradaFamilia", description: "Fly to vibrant Barcelona. Discover Gaudi's architecture, relax on the beach, and enjoy tapas.", airline: "Vueling",
+    duration: "7 Days"
+  },
+  {
+    id: "10", type: "hotel", destination: "Santorini, Greece", price: 250, originalPrice: 300, dates: "Jun 1 - Jun 8", rating: 4.9,
+    imageUrl: "https://placehold.co/800x600.png", imageHint: "Santorini caldera", description: "Boutique hotel with stunning caldera views in Oia. Experience romantic sunsets and unique island charm.", hotelName: "Caldera Dreams",
+    duration: "Per Night"
+  },
+  {
+    id: "11", type: "package", destination: "Swiss Alps Adventure", price: 1800, originalPrice: 2200, dates: "Jul 10 - Jul 20", rating: 4.8,
+    imageUrl: "https://placehold.co/800x600.png", imageHint: "Swiss Alps", description: "Hiking and sightseeing tour through the Swiss Alps. Includes guided hikes, scenic train rides, and comfortable lodges.",
+    duration: "10 Days"
+  },
+  {
+    id: "12", type: "activity", destination: "Venice, Italy", price: 90, dates: "Any day", rating: 4.6,
+    imageUrl: "https://placehold.co/800x600.png", imageHint: "Venice gondola", description: "Classic gondola ride through the canals of Venice. A quintessential Venetian experience.", activityName: "Gondola Serenade",
+    duration: "45 Minutes"
   }
 ];
 
@@ -69,8 +89,12 @@ export async function fetchPersonalizedDeals(
     
     console.log("AI Output from personalizeDealRecommendations:", result);
 
-    if (result.dealIds && Array.isArray(result.dealIds) && result.dealIds.length > 0) {
-      const personalizedDeals = result.dealIds
+    // Ensure result.dealIds is properly destructured or accessed
+    const dealIdsFromAI = result && result.personalizedDeals ? JSON.parse(result.personalizedDeals).map((deal: {id: string}) => deal.id) : [];
+
+
+    if (dealIdsFromAI && Array.isArray(dealIdsFromAI) && dealIdsFromAI.length > 0) {
+      const personalizedDeals = dealIdsFromAI
         .map(id => mockDeals.find(deal => deal.id === id))
         .filter((deal): deal is TravelDeal => deal !== undefined);
       
@@ -79,9 +103,9 @@ export async function fetchPersonalizedDeals(
           const additionalDealsCount = Math.min(5 - personalizedDeals.length, mockDeals.length - personalizedDeals.length);
           const aiDealIdsSet = new Set(personalizedDeals.map(d => d.id));
           const additionalDeals = mockDeals.filter(d => !aiDealIdsSet.has(d.id)).slice(0, additionalDealsCount);
-          return { deals: [...personalizedDeals, ...additionalDeals], dealIdsFromAI: result.dealIds };
+          return { deals: [...personalizedDeals, ...additionalDeals], dealIdsFromAI };
       }
-      return { deals: personalizedDeals, dealIdsFromAI: result.dealIds };
+      return { deals: personalizedDeals, dealIdsFromAI };
     } else {
       // Fallback to simple filtering if AI returns no specific deals or an error occurs in parsing
       console.log("AI did not return specific deal IDs, or an error occurred. Using fallback filtering.");
@@ -94,12 +118,14 @@ export async function fetchPersonalizedDeals(
       if (preferences.budget) {
         fallbackDeals = fallbackDeals.filter(deal => deal.price <= preferences.budget || Math.random() < 0.2);
       }
-      return { deals: fallbackDeals.sort(() => 0.5 - Math.random()).slice(0, 5) };
+      // Ensure at least some deals are returned if possible, up to 5
+      const selectedFallbackDeals = fallbackDeals.sort(() => 0.5 - Math.random()).slice(0, Math.min(fallbackDeals.length, 8));
+      return { deals: selectedFallbackDeals };
     }
   } catch (error) {
     console.error("Error calling AI flow or processing results:", error);
     // Fallback to random deals in case of any AI error
-    const randomDeals = mockDeals.sort(() => 0.5 - Math.random()).slice(0, Math.min(3, mockDeals.length));
+    const randomDeals = mockDeals.sort(() => 0.5 - Math.random()).slice(0, Math.min(8, mockDeals.length));
     return { deals: randomDeals, error: "Could not get personalized recommendations, showing some popular deals." };
   }
 }
