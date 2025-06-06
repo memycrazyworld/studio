@@ -1,10 +1,11 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: var(--font-body), sans-serif;
-}
+/* The body font is now applied via Tailwind's font-body class in layout.tsx, 
+   which uses the --font-pt-sans CSS variable from next/font.
+   So, the direct font-family rule here is removed. */
 
 @layer base {
   :root {
