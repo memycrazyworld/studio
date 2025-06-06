@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { TravelDeal } from "@/types";
-import { Plane, Hotel, Star, Tag, Ticket, Package as PackageIcon, ArrowRight } from "lucide-react"; 
+import { Plane, Hotel, Star, Tag, Ticket, Package as PackageIcon, ArrowRight } from "lucide-react";
 
 interface DealCardProps {
   deal: TravelDeal;
@@ -29,16 +29,17 @@ export function DealCard({ deal, isDiscountApplied }: DealCardProps) {
 
   return (
     
-      <Card className="overflow-hidden transition-all hover:shadow-xl duration-300 ease-in-out transform hover:-translate-y-1 flex flex-col h-full">
+      <Card className="group overflow-hidden transition-all hover:shadow-2xl duration-300 ease-in-out transform hover:-translate-y-2 hover:scale-[1.02] flex flex-col h-full">
         <Link href={`/deals/${deal.id}`} passHref legacyBehavior>
           <a className="block cursor-pointer">
-            <div className="relative w-full h-48">
+            <div className="relative w-full h-48 overflow-hidden"> {/* Added overflow-hidden */}
               <Image
                 src={deal.imageUrl}
                 alt={deal.destination}
                 layout="fill"
                 objectFit="cover"
                 data-ai-hint={deal.imageHint || "travel scene"}
+                className="transition-transform duration-300 ease-in-out group-hover:scale-110" // Added image zoom effect
               />
               <Badge variant="secondary" className="absolute top-2 right-2 capitalize flex items-center gap-1">
                 <TypeIcon type={deal.type} /> {deal.type}
