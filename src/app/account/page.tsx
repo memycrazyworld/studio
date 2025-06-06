@@ -7,15 +7,84 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { User, Settings, History, Edit3, LogOut } from "lucide-react";
+import { User, Settings, History, Edit3, LogOut, Plane, Hotel, Ticket, PackageIcon, CheckCircle, Clock, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+
+interface MockBooking {
+  id: string;
+  type: 'flight' | 'hotel' | 'activity' | 'package';
+  destination: string;
+  bookedOn: string;
+  travelDates: string;
+  status: 'Confirmed' | 'Upcoming' | 'Completed' | 'Cancelled';
+  price: number;
+  detailsLink: string;
+}
+
+const mockBookings: MockBooking[] = [
+  {
+    id: "booking1",
+    type: "package",
+    destination: "Bali, Indonesia",
+    bookedOn: "2023-11-15",
+    travelDates: "Dec 1 - Dec 10, 2023",
+    status: "Completed",
+    price: 1200,
+    detailsLink: "/deals/4", // Assuming deal ID 4 corresponds to Bali
+  },
+  {
+    id: "booking2",
+    type: "flight",
+    destination: "Paris, France",
+    bookedOn: "2024-03-01",
+    travelDates: "Oct 10 - Oct 17, 2024",
+    status: "Upcoming",
+    price: 350,
+    detailsLink: "/deals/1", // Assuming deal ID 1 corresponds to Paris flight
+  },
+  {
+    id: "booking3",
+    type: "hotel",
+    destination: "Tokyo, Japan",
+    bookedOn: "2024-05-20",
+    travelDates: "Nov 5 - Nov 12, 2024",
+    status: "Confirmed",
+    price: 840, // 120 * 7 nights
+    detailsLink: "/deals/2",
+  },
+];
+
+
+const BookingStatusIcon = ({ status }: { status: MockBooking['status']}) => {
+  switch (status) {
+    case 'Confirmed':
+    case 'Upcoming':
+      return <Clock className="h-4 w-4 text-blue-500" />;
+    case 'Completed':
+      return <CheckCircle className="h-4 w-4 text-green-500" />;
+    case 'Cancelled':
+      return <XCircle className="h-4 w-4 text-red-500" />;
+    default:
+      return <History className="h-4 w-4 text-muted-foreground" />;
+  }
+};
+
+const DealTypeIcon = ({ type }: { type: MockBooking['type'] }) => {
+  switch (type) {
+    case 'flight': return <Plane className="h-4 w-4 text-primary" />;
+    case 'hotel': return <Hotel className="h-4 w-4 text-primary" />;
+    case 'activity': return <Ticket className="h-4 w-4 text-primary" />;
+    case 'package': return <PackageIcon className="h-4 w-4 text-primary" />;
+    default: return null;
+  }
+};
+
 
 export default function AccountPage() {
-  // Placeholder for discount toggle, actual logic managed by WalletConnectButton
   const handleDiscountToggleStub = (isDiscounted: boolean) => {};
   
-  // Simulate user data
   const [user, setUser] = useState({
     name: "Wanderer Guest",
     email: "guest@wanderweb.com",
@@ -23,17 +92,21 @@ export default function AccountPage() {
     memberSince: "N/A",
   });
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userBookings, setUserBookings] = useState<MockBooking[]>([]);
 
   useEffect(() => {
     const walletConnected = localStorage.getItem("walletConnected") === "true";
     setIsLoggedIn(walletConnected);
     if (walletConnected) {
       setUser({
-        name: "Valued Wanderer", // Could be fetched or stored
-        email: "user@example.com", // Could be fetched or stored
-        avatarUrl: "https://placehold.co/100x100.png", // Replace with actual avatar or placeholder
-        memberSince: new Date().toLocaleDateString(), // Simulate join date
+        name: "Valued Wanderer",
+        email: "user@example.com",
+        avatarUrl: "https://placehold.co/100x100.png",
+        memberSince: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7).toLocaleDateString(), // Member for 7 days
       });
+      setUserBookings(mockBookings); // Load mock bookings if logged in
+    } else {
+      setUserBookings([]);
     }
   }, []);
 
@@ -68,8 +141,7 @@ export default function AccountPage() {
         </div>
 
         <div className="grid md:grid-cols-3 gap-8 items-start">
-          {/* Profile Card */}
-          <Card className="md:col-span-1 shadow-xl">
+          <Card className="md:col-span-1 shadow-xl rounded-lg">
             <CardHeader className="items-center text-center">
               <Avatar className="w-24 h-24 mb-4 border-4 border-primary/20">
                 <AvatarImage src={user.avatarUrl} alt={user.name} data-ai-hint="profile avatar" />
@@ -86,13 +158,11 @@ export default function AccountPage() {
             </CardContent>
           </Card>
 
-          {/* Other Sections Card */}
-          <Card className="md:col-span-2 shadow-xl">
+          <Card className="md:col-span-2 shadow-xl rounded-lg">
             <CardHeader>
               <CardTitle className="text-2xl font-headline text-primary">Account Details</CardTitle>
             </CardHeader>
             <CardContent className="space-y-8">
-              {/* Saved Preferences Section */}
               <div>
                 <h3 className="text-xl font-semibold mb-3 flex items-center text-foreground">
                   <Settings className="mr-3 h-6 w-6 text-accent" />
@@ -107,21 +177,56 @@ export default function AccountPage() {
                  <Separator className="my-6" />
               </div>
 
-              {/* Booking History Section */}
               <div>
                 <h3 className="text-xl font-semibold mb-3 flex items-center text-foreground">
                   <History className="mr-3 h-6 w-6 text-accent" />
                   Booking History
                 </h3>
-                <div className="border rounded-lg p-6 bg-muted/30 text-center">
-                  <History className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">
-                    You have no bookings yet.
-                  </p>
-                  <Button asChild variant="link" className="mt-2">
-                    <Link href="/">Explore Deals</Link>
-                  </Button>
-                </div>
+                {userBookings.length > 0 ? (
+                  <div className="space-y-4">
+                    {userBookings.map((booking) => (
+                      <Card key={booking.id} className="bg-muted/30 hover:shadow-md transition-shadow">
+                        <CardHeader className="pb-3">
+                          <div className="flex justify-between items-start">
+                            <div>
+                               <CardTitle className="text-lg flex items-center">
+                                <DealTypeIcon type={booking.type} />
+                                <span className="ml-2">{booking.destination}</span>
+                               </CardTitle>
+                              <CardDescription className="text-xs">Booked on: {new Date(booking.bookedOn).toLocaleDateString()}</CardDescription>
+                            </div>
+                            <Badge variant={
+                              booking.status === 'Completed' ? 'default' :
+                              booking.status === 'Cancelled' ? 'destructive' : 'secondary'
+                            } className="capitalize flex items-center gap-1.5 py-1 px-2.5 text-xs">
+                              <BookingStatusIcon status={booking.status} />
+                              {booking.status}
+                            </Badge>
+                          </div>
+                        </CardHeader>
+                        <CardContent className="text-sm space-y-1 pb-4">
+                          <p><strong>Travel Dates:</strong> {booking.travelDates}</p>
+                          <p><strong>Total Price:</strong> ${booking.price.toFixed(2)}</p>
+                        </CardContent>
+                        <CardFooter className="pt-0 pb-4">
+                           <Button asChild variant="link" size="sm" className="p-0 h-auto text-accent">
+                             <Link href={booking.detailsLink}>View Deal Details</Link>
+                           </Button>
+                        </CardFooter>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="border rounded-lg p-6 bg-muted/30 text-center">
+                    <History className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">
+                      You have no bookings yet.
+                    </p>
+                    <Button asChild variant="link" className="mt-2">
+                      <Link href="/">Explore Deals</Link>
+                    </Button>
+                  </div>
+                )}
               </div>
               
               <Separator className="my-6" />
@@ -145,3 +250,5 @@ export default function AccountPage() {
     </div>
   );
 }
+
+    
