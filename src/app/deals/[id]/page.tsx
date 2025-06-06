@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, CalendarDays, Clock, DollarSign, Hotel, MapPin, Plane, Star, Ticket, Package as PackageIcon, Info, Users, Loader2 } from "lucide-react";
+import { ArrowLeft, CalendarDays, Clock, DollarSign, Hotel, MapPin, Plane, Star, Ticket, Package as PackageIcon, Info, Users, Loader2, ArrowRight } from "lucide-react";
 import type { TravelDeal } from "@/types";
 import { Separator } from "@/components/ui/separator";
 import { useEffect, useState } from "react"; 
@@ -64,27 +64,32 @@ const DealTypeIcon = ({ type }: { type: TravelDeal['type'] }) => {
 
 export default function DealPage({ params }: DealPageProps) {
   const [deal, setDeal] = useState<TravelDeal | null | undefined>(undefined); 
+  const [isDiscountApplied, setIsDiscountApplied] = useState(false);
+
 
   useEffect(() => {
     async function loadDeal() {
       const fetchedDeal = await fetchDealById(params.id);
       setDeal(fetchedDeal || null); 
     }
-    loadDeal();
+    if (params.id) {
+        loadDeal();
+        // Check if discount was applied (e.g. from a global state or localStorage for demo)
+        const discountStatus = localStorage.getItem("discountApplied") === "true";
+        setIsDiscountApplied(discountStatus);
+    }
   }, [params.id]);
 
-  // For this page, the discount status is not directly managed.
-  // The WalletConnectButton in the header operates independently for discount application globally.
-  // If a discount is applied, it should ideally be passed or fetched, e.g. via query params or global state.
-  // For simplicity, this page's header discount toggle is a stub like before.
-  const handleDiscountToggleStub = (isDiscounted: boolean) => {
-    console.log("Discount toggle on deal detail page (stub):", isDiscounted);
+  const handleDiscountToggle = (isDiscounted: boolean) => {
+    setIsDiscountApplied(isDiscounted);
+     // Persist discount state for demo purposes for checkout page
+    localStorage.setItem("discountApplied", isDiscounted ? "true" : "false");
   };
 
   if (deal === undefined) { 
     return (
       <div className="flex flex-col min-h-screen bg-background">
-        <Header onDiscountToggle={handleDiscountToggleStub} />
+        <Header onDiscountToggle={handleDiscountToggle} />
         <main className="flex-grow container mx-auto px-4 py-8 flex flex-col items-center justify-center">
           <Loader2 className="h-16 w-16 text-primary animate-spin mb-4" />
           <h1 className="text-3xl font-bold mb-2 text-center text-primary">Loading Your Getaway...</h1>
@@ -101,7 +106,7 @@ export default function DealPage({ params }: DealPageProps) {
   if (!deal) {
     return (
       <div className="flex flex-col min-h-screen bg-background">
-        <Header onDiscountToggle={handleDiscountToggleStub} />
+        <Header onDiscountToggle={handleDiscountToggle} />
         <main className="flex-grow container mx-auto px-4 py-8 flex flex-col items-center justify-center">
           <MapPin className="h-16 w-16 text-destructive mb-4" />
           <h1 className="text-3xl font-bold mb-2 text-center">Deal Not Found</h1>
@@ -120,16 +125,13 @@ export default function DealPage({ params }: DealPageProps) {
     );
   }
   
-  // On the detail page, we generally show the base price.
-  // The discount is typically applied at checkout or confirmed via global state.
-  // The DealCard on the dashboard reflects the discount.
-  const displayPrice = deal.price;
-  const originalDisplayPrice = deal.originalPrice;
+  const displayPrice = isDiscountApplied ? deal.price * 0.9 : deal.price;
+  const originalDisplayPrice = isDiscountApplied ? deal.price : deal.originalPrice;
 
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <Header onDiscountToggle={handleDiscountToggleStub} />
+      <Header onDiscountToggle={handleDiscountToggle} />
       <main className="flex-grow container mx-auto px-4 py-8">
         <div className="mb-6">
           <Button asChild variant="outline" size="sm" className="hover:bg-accent/10">
@@ -152,6 +154,9 @@ export default function DealPage({ params }: DealPageProps) {
                 priority
                 className="md:rounded-l-xl"
               />
+               {isDiscountApplied && (
+                <Badge variant="destructive" className="absolute top-3 left-3 text-base px-3 py-1.5">10% OFF APPLIED</Badge>
+              )}
             </div>
             <div className="flex flex-col bg-card">
               <CardHeader className="pb-4">
@@ -201,9 +206,11 @@ export default function DealPage({ params }: DealPageProps) {
                   )}
                    { deal.type === 'hotel' && <span className="text-sm text-muted-foreground ml-1">per night</span> }
                 </div>
-                <Button size="lg" className="w-full sm:w-auto bg-accent hover:bg-accent/90 text-accent-foreground text-lg py-3 px-8 rounded-lg">
-                  Book Now
-                  <ArrowLeft className="mr-2 h-5 w-5 transform rotate-[135deg] ml-2" /> 
+                <Button size="lg" asChild className="w-full sm:w-auto bg-accent hover:bg-accent/90 text-accent-foreground text-lg py-3 px-8 rounded-lg">
+                  <Link href={`/checkout/${deal.id}`}>
+                    Book Now
+                    <ArrowRight className="h-5 w-5 ml-2" /> 
+                  </Link>
                 </Button>
               </CardFooter>
             </div>

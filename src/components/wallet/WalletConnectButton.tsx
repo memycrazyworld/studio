@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -22,21 +22,46 @@ export function WalletConnectButton({ onDiscountToggle }: WalletConnectButtonPro
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [uptBalance, setUptBalance] = useState(0);
-  const [discountAppliedState, setDiscountAppliedState] = useState(false); // Renamed to avoid conflict with prop
+  const [discountAppliedInternal, setDiscountAppliedInternal] = useState(false);
   const { toast } = useToast();
 
+  useEffect(() => {
+    // Check local storage on mount to restore discount state
+    const storedDiscountStatus = localStorage.getItem("discountApplied") === "true";
+    if (storedDiscountStatus) {
+      setDiscountAppliedInternal(true);
+      onDiscountToggle(true); // Notify parent
+    }
+     const storedConnectionStatus = localStorage.getItem("walletConnected") === "true";
+     const storedUptBalance = localStorage.getItem("uptBalance");
+     if (storedConnectionStatus) {
+        setIsConnected(true);
+        setUptBalance(storedUptBalance ? parseInt(storedUptBalance, 10) : 0);
+     }
+
+
+  }, [onDiscountToggle]);
+
+
   const handleConnect = () => {
+    const newBalance = Math.floor(Math.random() * 500) + 50;
     setIsConnected(true);
-    setUptBalance(Math.floor(Math.random() * 500) + 50); 
+    setUptBalance(newBalance); 
     setIsDialogOpen(true);
+    localStorage.setItem("walletConnected", "true");
+    localStorage.setItem("uptBalance", newBalance.toString());
     toast({ title: "Wallet Connected", description: "Successfully connected to your Uprock wallet." });
   };
 
   const handleApplyDiscount = () => {
     if (uptBalance >= 100) {
-      setUptBalance(prev => prev - 100);
-      setDiscountAppliedState(true);
+      const newBalance = uptBalance - 100;
+      setUptBalance(newBalance);
+      localStorage.setItem("uptBalance", newBalance.toString());
+      
+      setDiscountAppliedInternal(true);
       onDiscountToggle(true);
+      localStorage.setItem("discountApplied", "true");
       toast({ title: "Discount Applied!", description: "100 $UPT redeemed for a 10% discount." });
       setIsDialogOpen(false);
     } else {
@@ -45,12 +70,10 @@ export function WalletConnectButton({ onDiscountToggle }: WalletConnectButtonPro
   };
 
   const handleRemoveDiscount = () => {
-    setDiscountAppliedState(false);
+    setDiscountAppliedInternal(false);
     onDiscountToggle(false);
-    // To prevent refunding tokens every time dialog is opened after removing discount,
-    // we don't automatically add back 100 $UPT here. This simulates tokens being spent.
-    // If re-applying discount should be possible with same initial tokens, 
-    // a more complex balance management would be needed.
+    localStorage.setItem("discountApplied", "false");
+    // We don't refund tokens here to simulate them being spent.
     toast({ title: "Discount Removed", description: "The 10% discount has been removed." });
     setIsDialogOpen(false);
   }
@@ -60,9 +83,9 @@ export function WalletConnectButton({ onDiscountToggle }: WalletConnectButtonPro
   if (isConnected) {
     return (
       <>
-        <Button onClick={openDialog} variant={discountAppliedState ? "secondary" : "outline"} className={discountAppliedState ? "bg-green-600 hover:bg-green-700 text-white" : ""}>
+        <Button onClick={openDialog} variant={discountAppliedInternal ? "secondary" : "outline"} className={discountAppliedInternal ? "bg-green-600 hover:bg-green-700 text-white" : ""}>
           <Wallet className="mr-2 h-4 w-4" />
-          {discountAppliedState ? "Discount Active" : "Wallet Connected"} ({uptBalance} $UPT)
+          {discountAppliedInternal ? "Discount Active" : "Wallet Connected"} ({uptBalance} $UPT)
         </Button>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogContent>
@@ -73,14 +96,14 @@ export function WalletConnectButton({ onDiscountToggle }: WalletConnectButtonPro
               </DialogDescription>
             </DialogHeader>
             <div className="py-4">
-              {discountAppliedState ? (
+              {discountAppliedInternal ? (
                 <p className="text-sm text-green-600 font-semibold">A 10% discount is currently active on deals!</p>
               ): (
                 <p className="text-sm">Redeem 100 $UPT tokens for a 10% discount on your travel deals.</p>
               )}
             </div>
             <DialogFooter>
-              {discountAppliedState ? (
+              {discountAppliedInternal ? (
                 <Button variant="destructive" onClick={handleRemoveDiscount}>Remove Discount</Button>
               ) : (
                 <Button onClick={handleApplyDiscount} disabled={uptBalance < 100} className="bg-accent hover:bg-accent/90 text-accent-foreground">
