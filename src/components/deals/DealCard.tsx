@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { TravelDeal } from "@/types";
-import { Plane, Hotel, MapPin, Star, Tag, Ticket } from "lucide-react";
+import { Plane, Hotel, MapPin, Star, Tag, Ticket, Briefcase } from "lucide-react";
 
 interface DealCardProps {
   deal: TravelDeal;
