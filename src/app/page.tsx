@@ -57,7 +57,8 @@ export default function HomePage() {
         if (result.deals) {
           setDeals(result.deals);
         }
-      } catch (error) {
+      } catch (error)
+{
         console.error("Failed to fetch initial deals:", error);
       } finally {
         setIsLoading(false);
@@ -97,7 +98,7 @@ export default function HomePage() {
               </div>
 
               {/* Right Column: Form Card */}
-              <div className="w-full max-w-md lg:max-w-lg mx-auto md:mx-0">
+              <div className="w-full max-w-md lg:max-w-lg mx-auto"> {/* Changed md:mx-0 to mx-auto for consistent centering */}
                 <div className="bg-card/85 backdrop-blur-md p-6 sm:p-8 rounded-xl shadow-2xl">
                   <h2 className="text-2xl font-semibold mb-6 text-center text-card-foreground">
                     Find Your Perfect Getaway
