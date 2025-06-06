@@ -1,3 +1,4 @@
+"use client";
 
 import { fetchDealById } from "@/app/actions";
 import { Header } from "@/components/layout/Header";
@@ -10,6 +11,7 @@ import Link from "next/link";
 import { ArrowLeft, CalendarDays, Clock, DollarSign, Hotel, MapPin, Plane, Star, Ticket, Package as PackageIcon, Info, Users } from "lucide-react";
 import type { TravelDeal } from "@/types";
 import { Separator } from "@/components/ui/separator";
+import { useEffect, useState } from "react"; // Import useState and useEffect for client component
 
 interface DealPageProps {
   params: {
@@ -59,8 +61,17 @@ const DealTypeIcon = ({ type }: { type: TravelDeal['type'] }) => {
 };
 
 
-export default async function DealPage({ params }: DealPageProps) {
-  const deal = await fetchDealById(params.id);
+export default function DealPage({ params }: DealPageProps) {
+  const [deal, setDeal] = useState<TravelDeal | null | undefined>(undefined); // undefined for loading, null for not found
+
+  useEffect(() => {
+    async function loadDeal() {
+      const fetchedDeal = await fetchDealById(params.id);
+      setDeal(fetchedDeal || null); // Set to null if not found
+    }
+    loadDeal();
+  }, [params.id]);
+
 
   // For Header discount toggle - it doesn't actually apply to this page's price directly
   // but we need to pass the prop. We'll assume no discount for simplicity here or
@@ -69,6 +80,23 @@ export default async function DealPage({ params }: DealPageProps) {
     // This function is a stub for the Header prop
     console.log("Discount toggle on deal page:", isDiscounted);
   };
+
+  if (deal === undefined) { // Loading state
+    return (
+      <div className="flex flex-col min-h-screen bg-background">
+        <Header onDiscountToggle={handleDiscountToggle} />
+        <main className="flex-grow container mx-auto px-4 py-8 flex flex-col items-center justify-center">
+          <PackageIcon className="h-16 w-16 text-primary animate-pulse mb-4" />
+          <h1 className="text-3xl font-bold mb-2 text-center">Loading Deal...</h1>
+          <p className="text-muted-foreground text-center mb-6">
+            Please wait while we fetch the details of your amazing getaway!
+          </p>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
 
   if (!deal) {
     return (
