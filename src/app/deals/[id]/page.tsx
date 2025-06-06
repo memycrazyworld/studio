@@ -12,15 +12,8 @@ import Link from "next/link";
 import { ArrowLeft, CalendarDays, Clock, DollarSign, Hotel, MapPin, Plane, Star, Ticket, Package as PackageIcon, Info, Users, Loader2, ArrowRight } from "lucide-react";
 import type { TravelDeal } from "@/types";
 import { Separator } from "@/components/ui/separator";
-import { useEffect, useState } from "react"; 
+import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-
-// DealPageProps is no longer needed if params are not passed as props
-// interface DealPageProps {
-//   params: {
-//     id: string;
-//   };
-// }
 
 const TypeSpecificDetails = ({ deal }: { deal: TravelDeal }) => {
   return (
@@ -68,7 +61,7 @@ export default function DealPage() {
   const routeParams = useParams<{ id: string }>();
   const id = routeParams.id;
 
-  const [deal, setDeal] = useState<TravelDeal | null | undefined>(undefined); 
+  const [deal, setDeal] = useState<TravelDeal | null | undefined>(undefined);
   const [isDiscountApplied, setIsDiscountApplied] = useState(false);
 
 
@@ -76,7 +69,7 @@ export default function DealPage() {
     async function loadDeal() {
       if (id) { // Ensure id is available
         const fetchedDeal = await fetchDealById(id);
-        setDeal(fetchedDeal || null); 
+        setDeal(fetchedDeal || null);
       }
     }
     if (id) {
@@ -84,14 +77,14 @@ export default function DealPage() {
         const discountStatus = localStorage.getItem("discountApplied") === "true";
         setIsDiscountApplied(discountStatus);
     }
-  }, [id]);
+  }, [id]); // Correctly using 'id' from useParams in the dependency array
 
   const handleDiscountToggle = (isDiscounted: boolean) => {
     setIsDiscountApplied(isDiscounted);
     localStorage.setItem("discountApplied", isDiscounted ? "true" : "false");
   };
 
-  if (deal === undefined) { 
+  if (deal === undefined) {
     return (
       <div className="flex flex-col min-h-screen bg-background">
         <Header onDiscountToggle={handleDiscountToggle} />
@@ -129,7 +122,7 @@ export default function DealPage() {
       </div>
     );
   }
-  
+
   const displayPrice = isDiscountApplied ? deal.price * 0.9 : deal.price;
   const originalDisplayPrice = isDiscountApplied ? deal.price : deal.originalPrice;
 
@@ -151,7 +144,7 @@ export default function DealPage() {
           <div className="grid md:grid-cols-2 gap-0">
             <div className="relative w-full h-72 md:h-auto min-h-[300px] md:min-h-[450px]">
               <Image
-                src={deal.imageUrl.replace('600x400', '800x600')} 
+                src={deal.imageUrl.replace('600x400', '800x600')}
                 alt={deal.destination}
                 layout="fill"
                 objectFit="cover"
@@ -194,14 +187,14 @@ export default function DealPage() {
                     </div>
                   )}
                 </div>
-                
+
                 <Separator />
 
                 <h3 className="font-semibold text-xl text-foreground">About this deal</h3>
                 <CardDescription className="text-base leading-relaxed whitespace-pre-line">
                   {deal.description}
                 </CardDescription>
-                
+
               </CardContent>
               <CardFooter className="flex flex-col sm:flex-row items-center justify-between pt-6 mt-auto bg-muted/30 p-6 border-t">
                 <div className="mb-4 sm:mb-0 text-center sm:text-left">
@@ -214,7 +207,7 @@ export default function DealPage() {
                 <Button size="lg" asChild className="w-full sm:w-auto bg-accent hover:bg-accent/90 text-accent-foreground text-lg py-3 px-8 rounded-lg">
                   <Link href={`/checkout/${deal.id}`}>
                     Book Now
-                    <ArrowRight className="h-5 w-5 ml-2" /> 
+                    <ArrowRight className="h-5 w-5 ml-2" />
                   </Link>
                 </Button>
               </CardFooter>
@@ -226,4 +219,3 @@ export default function DealPage() {
     </div>
   );
 }
-
