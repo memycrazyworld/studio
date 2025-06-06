@@ -11,6 +11,7 @@ import { fetchPersonalizedDeals } from "./actions";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button"; // Added for potential CTA
 
 export default function HomePage() {
   const [deals, setDeals] = useState<TravelDeal[]>([]);
@@ -21,7 +22,7 @@ export default function HomePage() {
 
   const handlePreferencesSubmit = async (preferences: UserPreferences) => {
     setIsLoading(true);
-    setDeals([]); 
+    setDeals([]);
     try {
       const result = await fetchPersonalizedDeals(preferences);
       if (result.error) {
@@ -47,11 +48,11 @@ export default function HomePage() {
     const loadInitialDeals = async () => {
       setIsLoading(true);
        try {
-        const result = await fetchPersonalizedDeals({ 
-            destination: "", 
-            departureCity: "", 
-            budget: 5000, 
-            interests: [] 
+        const result = await fetchPersonalizedDeals({
+            destination: "",
+            departureCity: "",
+            budget: 5000,
+            interests: []
         });
         if (result.deals) {
           setDeals(result.deals);
@@ -65,7 +66,7 @@ export default function HomePage() {
     };
     loadInitialDeals();
   }, []);
-  
+
   const handleDiscountToggle = (isDiscounted: boolean) => {
     setIsDiscountApplied(isDiscounted);
   };
@@ -74,29 +75,45 @@ export default function HomePage() {
     <div className="flex flex-col min-h-screen bg-background">
       <Header onDiscountToggle={handleDiscountToggle} />
       <main className="flex-grow">
-        <section 
-          id="preferences" 
+        <section
+          id="preferences"
           aria-labelledby="preferences-heading"
-          className="relative bg-cover bg-center py-20 sm:py-28 md:py-32 flex flex-col items-center justify-center text-center min-h-[70vh] md:min-h-[60vh]"
+          className="relative bg-cover bg-center py-16 sm:py-24 md:py-32 flex items-center min-h-[70vh] md:min-h-[80vh] lg:min-h-screen"
           style={{ backgroundImage: "url('https://placehold.co/1920x1080.png')" }}
           data-ai-hint="tropical beach"
         >
-          <div className="absolute inset-0 bg-black/60 z-0"></div>
-          
-          <div className="relative z-10 container px-4">
-            <h1 id="preferences-heading" className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 text-white font-headline">
-              Discover Your Next Adventure
-            </h1>
-            <p className="text-lg sm:text-xl text-neutral-200 mb-10 max-w-2xl mx-auto">
-              Tell us your travel dreams, and WanderWeb will find the perfect getaway for you, powered by AI.
-            </p>
-            
-            <div className="max-w-3xl mx-auto bg-card p-6 sm:p-8 rounded-xl shadow-2xl">
-              <PreferenceForm onSubmit={handlePreferencesSubmit} isLoading={isLoading && !initialLoadComplete} />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30 md:to-transparent z-0"></div> {/* Adjusted gradient for better coverage */}
+
+          <div className="relative z-10 container px-4 mx-auto w-full">
+            <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+              {/* Left Column: Text */}
+              <div className="text-center md:text-left">
+                <h1 id="preferences-heading" className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 text-white font-headline leading-tight">
+                  Your Journey Begins Here.
+                </h1>
+                <p className="text-lg sm:text-xl text-neutral-200 mb-8 md:mb-10 max-w-xl md:max-w-none mx-auto md:mx-0">
+                  Craft your dream vacation. WanderWeb's AI curates personalized travel deals, just for you.
+                </p>
+                {/* Optional: Example of a CTA button if needed later
+                <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground hidden md:inline-flex">
+                  Explore Destinations
+                </Button>
+                */}
+              </div>
+
+              {/* Right Column: Form Card */}
+              <div className="w-full max-w-md lg:max-w-lg mx-auto md:mx-0">
+                <div className="bg-card/85 backdrop-blur-md p-6 sm:p-8 rounded-xl shadow-2xl">
+                  <h2 className="text-2xl font-semibold mb-6 text-center text-card-foreground">
+                    Find Your Perfect Getaway
+                  </h2>
+                  <PreferenceForm onSubmit={handlePreferencesSubmit} isLoading={isLoading && !initialLoadComplete} />
+                </div>
+              </div>
             </div>
           </div>
         </section>
-        
+
         <div className="container mx-auto px-4 py-12 space-y-12">
           <Separator />
           <section id="deals" aria-labelledby="deals-heading" className="min-h-[400px]">
