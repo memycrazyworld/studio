@@ -1,3 +1,4 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,9 +18,10 @@ import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label"; // Import Label for interests
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { CalendarIcon, MapPin, DollarSign, Sailboat, Briefcase, MountainSnow,Sun } from "lucide-react";
+import { CalendarIcon, MapPin, DollarSign, Sailboat, Briefcase, MountainSnow, Sun } from "lucide-react";
 import type { UserPreferences } from "@/types";
 
 const interestOptions = [
@@ -65,7 +67,7 @@ export function PreferenceForm({ onSubmit, isLoading }: PreferenceFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <FormField
             control={form.control}
             name="destination"
@@ -98,10 +100,7 @@ export function PreferenceForm({ onSubmit, isLoading }: PreferenceFormProps) {
               </FormItem>
             )}
           />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <FormField
+           <FormField
             control={form.control}
             name="budget"
             render={({ field }) => (
@@ -117,6 +116,9 @@ export function PreferenceForm({ onSubmit, isLoading }: PreferenceFormProps) {
               </FormItem>
             )}
           />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={form.control}
             name="startDate"
@@ -129,7 +131,7 @@ export function PreferenceForm({ onSubmit, isLoading }: PreferenceFormProps) {
                       <Button
                         variant={"outline"}
                         className={cn(
-                          "pl-3 text-left font-normal",
+                          "pl-3 text-left font-normal w-full justify-start",
                           !field.value && "text-muted-foreground"
                         )}
                       >
@@ -170,7 +172,7 @@ export function PreferenceForm({ onSubmit, isLoading }: PreferenceFormProps) {
                       <Button
                         variant={"outline"}
                         className={cn(
-                          "pl-3 text-left font-normal",
+                          "pl-3 text-left font-normal w-full justify-start",
                           !field.value && "text-muted-foreground"
                         )}
                       >
@@ -204,7 +206,7 @@ export function PreferenceForm({ onSubmit, isLoading }: PreferenceFormProps) {
         <FormField
           control={form.control}
           name="interests"
-          render={() => (
+          render={({ field }) => (
             <FormItem>
               <div className="mb-4">
                 <FormLabel className="text-base">Interests</FormLabel>
@@ -212,42 +214,39 @@ export function PreferenceForm({ onSubmit, isLoading }: PreferenceFormProps) {
                   Select your travel interests.
                 </FormDescription>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {interestOptions.map((item) => (
-                  <FormField
-                    key={item.id}
-                    control={form.control}
-                    name="interests"
-                    render={({ field }) => {
-                      const Icon = item.icon;
-                      return (
-                        <FormItem
-                          key={item.id}
-                          className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-4 hover:bg-secondary/50 transition-colors"
-                        >
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value?.includes(item.id)}
-                              onCheckedChange={(checked) => {
-                                return checked
-                                  ? field.onChange([...(field.value || []), item.id])
-                                  : field.onChange(
-                                      (field.value || []).filter(
-                                        (value) => value !== item.id
-                                      )
-                                    );
-                              }}
-                            />
-                          </FormControl>
-                          <FormLabel className="font-normal flex items-center gap-2 cursor-pointer">
-                            <Icon className="h-5 w-5 text-primary" />
-                            {item.label}
-                          </FormLabel>
-                        </FormItem>
-                      );
-                    }}
-                  />
-                ))}
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                {interestOptions.map((item) => {
+                  const IconComponent = item.icon;
+                  const checkboxId = `interest-${item.id}`;
+                  return (
+                    <div 
+                      key={item.id} 
+                      className="flex items-center space-x-2 rounded-md border p-3 hover:bg-secondary/50 transition-colors bg-background/30"
+                    >
+                      <Checkbox
+                        id={checkboxId}
+                        checked={field.value?.includes(item.id)}
+                        onCheckedChange={(checked) => {
+                          return checked
+                            ? field.onChange([...(field.value || []), item.id])
+                            : field.onChange(
+                                (field.value || []).filter(
+                                  (value) => value !== item.id
+                                )
+                              );
+                        }}
+                        className="border-primary data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
+                      />
+                      <Label
+                        htmlFor={checkboxId}
+                        className="font-normal flex items-center gap-1.5 cursor-pointer text-sm w-full"
+                      >
+                        <IconComponent className="h-4 w-4 text-primary" />
+                        {item.label}
+                      </Label>
+                    </div>
+                  );
+                })}
               </div>
               <FormMessage />
             </FormItem>
@@ -260,3 +259,4 @@ export function PreferenceForm({ onSubmit, isLoading }: PreferenceFormProps) {
     </Form>
   );
 }
+
