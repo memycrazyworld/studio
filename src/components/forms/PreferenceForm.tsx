@@ -214,7 +214,7 @@ export function PreferenceForm({ onSubmit, isLoading }: PreferenceFormProps) {
                   Select your travel interests.
                 </FormDescription>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 {interestOptions.map((item) => {
                   const IconComponent = item.icon;
                   const checkboxId = `interest-${item.id}`;
