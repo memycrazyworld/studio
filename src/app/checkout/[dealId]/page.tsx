@@ -5,13 +5,21 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import Link from "next/link";
-import { ArrowLeft, ShoppingCart, CreditCard } from "lucide-react";
+import Image from "next/image";
+import { ArrowLeft, ShoppingCart, Bitcoin, Copy, QrCode } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { TravelDeal } from "@/types";
 import { fetchDealById } from "@/app/actions";
-import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 
 
@@ -20,19 +28,15 @@ export default function CheckoutPage() {
   const dealId = params.dealId as string;
   const [deal, setDeal] = useState<TravelDeal | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isDiscountApplied, setIsDiscountApplied] = useState(false); // This would ideally come from a global state or query param
+  const [isDiscountApplied, setIsDiscountApplied] = useState(false);
   const { toast } = useToast();
+  const [selectedCrypto, setSelectedCrypto] = useState("UPT");
+  const mockWalletAddress = "0x123abcDEF456ghiJKL789mnoPQR"; // A bit longer for realism
 
-  // Stub for discount toggle, not fully functional on this page without global state
   const handleDiscountToggleStub = (isDiscounted: boolean) => {
-    console.log("Discount toggle on checkout page (stub):", isDiscounted);
-    // In a real app, this might come from a context or URL parameter
-    // For now, we'll let WalletConnectButton manage its own display,
-    // but the actual price calculation here won't reflect it dynamically
-    // unless we pass it explicitly or use a shared state.
-    // We can simulate checking if a discount was applied perhaps via localStorage or a simple prop if needed.
+    // This is a stub, actual discount logic is managed via localStorage for demo
+    // and reflected in finalPrice calculation.
   };
-
 
   useEffect(() => {
     if (dealId) {
@@ -40,25 +44,28 @@ export default function CheckoutPage() {
         setDeal(fetchedDeal || null);
         setIsLoading(false);
       });
-      // Check if discount was applied (e.g. from a global state or localStorage for demo)
-      // This is a simplified check.
       const discountStatus = localStorage.getItem("discountApplied") === "true";
       setIsDiscountApplied(discountStatus);
-
     }
   }, [dealId]);
 
   const finalPrice = deal ? (isDiscountApplied ? deal.price * 0.9 : deal.price) : 0;
   const originalDisplayPrice = deal ? (isDiscountApplied ? deal.price : deal.originalPrice) : undefined;
 
-
   const handleConfirmBooking = () => {
     toast({
-        title: "Booking Confirmed (Simulated)",
-        description: `Your booking for ${deal?.destination || 'the deal'} for $${finalPrice.toFixed(2)} is confirmed!`,
+        title: "Crypto Payment Initiated (Simulated)",
+        description: `Your booking for ${deal?.destination || 'the deal'} for $${finalPrice.toFixed(2)} (payable in ${selectedCrypto}) is processing!`,
     });
-    // Here you would typically redirect to a confirmation page or dashboard
-  }
+  };
+
+  const handleCopyAddress = () => {
+    navigator.clipboard.writeText(mockWalletAddress);
+    toast({
+      title: "Wallet Address Copied!",
+      description: "You can now paste it into your wallet.",
+    });
+  };
 
   if (isLoading) {
     return (
@@ -106,7 +113,7 @@ export default function CheckoutPage() {
             <Card className="overflow-hidden shadow-xl">
                  <CardHeader>
                     <CardTitle className="text-3xl font-headline text-primary flex items-center">
-                        <ShoppingCart className="mr-3 h-8 w-8" /> Checkout
+                        <ShoppingCart className="mr-3 h-8 w-8" /> Checkout Summary
                     </CardTitle>
                     <CardDescription>Confirm your booking for this amazing travel deal.</CardDescription>
                 </CardHeader>
@@ -152,43 +159,56 @@ export default function CheckoutPage() {
                     </div>
 
                     <Button size="lg" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground text-lg py-3" onClick={handleConfirmBooking}>
-                        <CreditCard className="mr-2 h-5 w-5" />
-                        Confirm & Book Now
+                        <Bitcoin className="mr-2 h-5 w-5" />
+                        Proceed with Crypto Payment
                     </Button>
                 </CardContent>
             </Card>
             
-            {/* Placeholder for Payment Form */}
             <Card className="shadow-xl">
                 <CardHeader>
-                    <CardTitle className="text-2xl font-headline text-primary">Payment Information</CardTitle>
-                    <CardDescription>Enter your payment details below.</CardDescription>
+                    <CardTitle className="text-2xl font-headline text-primary">Crypto Information</CardTitle>
+                    <CardDescription>Please find the crypto transaction details below.</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-6">
                     <div>
-                        <label htmlFor="cardName" className="block text-sm font-medium text-muted-foreground mb-1">Name on Card</label>
-                        <input type="text" id="cardName" className="w-full p-2 border rounded-md bg-input" placeholder="John M. Doe" />
+                        <Label htmlFor="cryptoSelect" className="block text-sm font-medium text-muted-foreground mb-2">Select Cryptocurrency</Label>
+                        <Select value={selectedCrypto} onValueChange={setSelectedCrypto}>
+                            <SelectTrigger id="cryptoSelect" className="w-full">
+                                <SelectValue placeholder="Choose crypto" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="UPT">$UPT (Uprock)</SelectItem>
+                                <SelectItem value="BTC">BTC (Bitcoin)</SelectItem>
+                                <SelectItem value="ETH">ETH (Ethereum)</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
+
                     <div>
-                        <label htmlFor="cardNumber" className="block text-sm font-medium text-muted-foreground mb-1">Card Number</label>
-                        <input type="text" id="cardNumber" className="w-full p-2 border rounded-md bg-input" placeholder="•••• •••• •••• ••••" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label htmlFor="expiryDate" className="block text-sm font-medium text-muted-foreground mb-1">Expiry Date</label>
-                            <input type="text" id="expiryDate" className="w-full p-2 border rounded-md bg-input" placeholder="MM/YY" />
+                        <Label className="block text-sm font-medium text-muted-foreground mb-1">Send to this Address:</Label>
+                        <div className="flex items-center gap-2 p-2.5 border rounded-md bg-input text-sm">
+                            <span className="truncate flex-grow font-mono">{mockWalletAddress}</span>
+                            <Button variant="ghost" size="sm" onClick={handleCopyAddress} className="shrink-0">
+                                <Copy className="h-4 w-4 mr-1.5" /> Copy
+                            </Button>
                         </div>
-                        <div>
-                            <label htmlFor="cvc" className="block text-sm font-medium text-muted-foreground mb-1">CVC</label>
-                            <input type="text" id="cvc" className="w-full p-2 border rounded-md bg-input" placeholder="•••" />
+                         <p className="text-xs text-muted-foreground mt-1.5">Network: {selectedCrypto === 'BTC' ? 'Bitcoin Network' : selectedCrypto === 'ETH' ? 'Ethereum (ERC20)' : 'Uprock Network (Simulated)'}</p>
+                    </div>
+
+                    <div className="flex flex-col items-center space-y-2">
+                         <Label className="block text-sm font-medium text-muted-foreground">Or Scan QR Code</Label>
+                        <div className="p-2 border rounded-md bg-white inline-block">
+                           <Image src={`https://placehold.co/150x150.png`} alt="QR Code Placeholder" width={150} height={150} data-ai-hint="QR code payment" />
                         </div>
                     </div>
-                    <div className="flex items-center space-x-2 mt-2">
-                        <input type="checkbox" id="saveCard" className="rounded border-primary text-primary focus:ring-primary" />
-                        <label htmlFor="saveCard" className="text-sm text-muted-foreground">Save card for future purchases</label>
+                     <div>
+                        <p className="text-lg font-semibold">Amount Due: <span className="text-primary">${finalPrice.toFixed(2)} USD</span></p>
+                        <p className="text-xs text-muted-foreground">Payable in {selectedCrypto}. Ensure you send the exact equivalent amount for your chosen cryptocurrency.</p>
                     </div>
-                     <p className="text-xs text-muted-foreground mt-4">
-                        This is a simulated payment form. No real transaction will occur.
+
+                     <p className="text-xs text-muted-foreground mt-4 text-center">
+                        This is a simulated crypto payment process. No real transaction will occur. Always double-check addresses and network compatibility in real transactions.
                     </p>
                 </CardContent>
             </Card>
@@ -199,4 +219,3 @@ export default function CheckoutPage() {
     </div>
   );
 }
-
