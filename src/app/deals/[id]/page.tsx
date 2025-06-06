@@ -13,12 +13,14 @@ import { ArrowLeft, CalendarDays, Clock, DollarSign, Hotel, MapPin, Plane, Star,
 import type { TravelDeal } from "@/types";
 import { Separator } from "@/components/ui/separator";
 import { useEffect, useState } from "react"; 
+import { useParams } from "next/navigation";
 
-interface DealPageProps {
-  params: {
-    id: string;
-  };
-}
+// DealPageProps is no longer needed if params are not passed as props
+// interface DealPageProps {
+//   params: {
+//     id: string;
+//   };
+// }
 
 const TypeSpecificDetails = ({ deal }: { deal: TravelDeal }) => {
   return (
@@ -62,27 +64,30 @@ const DealTypeIcon = ({ type }: { type: TravelDeal['type'] }) => {
 };
 
 
-export default function DealPage({ params }: DealPageProps) {
+export default function DealPage() {
+  const routeParams = useParams<{ id: string }>();
+  const id = routeParams.id;
+
   const [deal, setDeal] = useState<TravelDeal | null | undefined>(undefined); 
   const [isDiscountApplied, setIsDiscountApplied] = useState(false);
 
 
   useEffect(() => {
     async function loadDeal() {
-      const fetchedDeal = await fetchDealById(params.id);
-      setDeal(fetchedDeal || null); 
+      if (id) { // Ensure id is available
+        const fetchedDeal = await fetchDealById(id);
+        setDeal(fetchedDeal || null); 
+      }
     }
-    if (params.id) {
+    if (id) {
         loadDeal();
-        // Check if discount was applied (e.g. from a global state or localStorage for demo)
         const discountStatus = localStorage.getItem("discountApplied") === "true";
         setIsDiscountApplied(discountStatus);
     }
-  }, [params.id]);
+  }, [id]);
 
   const handleDiscountToggle = (isDiscounted: boolean) => {
     setIsDiscountApplied(isDiscounted);
-     // Persist discount state for demo purposes for checkout page
     localStorage.setItem("discountApplied", isDiscounted ? "true" : "false");
   };
 
@@ -221,3 +226,4 @@ export default function DealPage({ params }: DealPageProps) {
     </div>
   );
 }
+
