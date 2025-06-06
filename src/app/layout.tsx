@@ -13,8 +13,8 @@ const ptSans = PT_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'Uprock Getaways',
-  description: 'Find personalized travel deals.',
+  title: 'WanderWeb',
+  description: 'Find personalized travel deals with WanderWeb.',
 };
 
 export default function RootLayout({
