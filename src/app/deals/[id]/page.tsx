@@ -1,3 +1,4 @@
+
 "use client";
 
 import { fetchDealById } from "@/app/actions";
@@ -8,10 +9,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, CalendarDays, Clock, DollarSign, Hotel, MapPin, Plane, Star, Ticket, Package as PackageIcon, Info, Users } from "lucide-react";
+import { ArrowLeft, CalendarDays, Clock, DollarSign, Hotel, MapPin, Plane, Star, Ticket, Package as PackageIcon, Info, Users, Loader2 } from "lucide-react";
 import type { TravelDeal } from "@/types";
 import { Separator } from "@/components/ui/separator";
-import { useEffect, useState } from "react"; // Import useState and useEffect for client component
+import { useEffect, useState } from "react"; 
 
 interface DealPageProps {
   params: {
@@ -62,34 +63,33 @@ const DealTypeIcon = ({ type }: { type: TravelDeal['type'] }) => {
 
 
 export default function DealPage({ params }: DealPageProps) {
-  const [deal, setDeal] = useState<TravelDeal | null | undefined>(undefined); // undefined for loading, null for not found
+  const [deal, setDeal] = useState<TravelDeal | null | undefined>(undefined); 
 
   useEffect(() => {
     async function loadDeal() {
       const fetchedDeal = await fetchDealById(params.id);
-      setDeal(fetchedDeal || null); // Set to null if not found
+      setDeal(fetchedDeal || null); 
     }
     loadDeal();
   }, [params.id]);
 
-
-  // For Header discount toggle - it doesn't actually apply to this page's price directly
-  // but we need to pass the prop. We'll assume no discount for simplicity here or
-  // a more complex state management would be needed if it should persist.
-  const handleDiscountToggle = (isDiscounted: boolean) => {
-    // This function is a stub for the Header prop
-    console.log("Discount toggle on deal page:", isDiscounted);
+  // For this page, the discount status is not directly managed.
+  // The WalletConnectButton in the header operates independently for discount application globally.
+  // If a discount is applied, it should ideally be passed or fetched, e.g. via query params or global state.
+  // For simplicity, this page's header discount toggle is a stub like before.
+  const handleDiscountToggleStub = (isDiscounted: boolean) => {
+    console.log("Discount toggle on deal detail page (stub):", isDiscounted);
   };
 
-  if (deal === undefined) { // Loading state
+  if (deal === undefined) { 
     return (
       <div className="flex flex-col min-h-screen bg-background">
-        <Header onDiscountToggle={handleDiscountToggle} />
+        <Header onDiscountToggle={handleDiscountToggleStub} />
         <main className="flex-grow container mx-auto px-4 py-8 flex flex-col items-center justify-center">
-          <PackageIcon className="h-16 w-16 text-primary animate-pulse mb-4" />
-          <h1 className="text-3xl font-bold mb-2 text-center">Loading Deal...</h1>
-          <p className="text-muted-foreground text-center mb-6">
-            Please wait while we fetch the details of your amazing getaway!
+          <Loader2 className="h-16 w-16 text-primary animate-spin mb-4" />
+          <h1 className="text-3xl font-bold mb-2 text-center text-primary">Loading Your Getaway...</h1>
+          <p className="text-muted-foreground text-center">
+            Fetching the amazing details of your selected deal!
           </p>
         </main>
         <Footer />
@@ -101,7 +101,7 @@ export default function DealPage({ params }: DealPageProps) {
   if (!deal) {
     return (
       <div className="flex flex-col min-h-screen bg-background">
-        <Header onDiscountToggle={handleDiscountToggle} />
+        <Header onDiscountToggle={handleDiscountToggleStub} />
         <main className="flex-grow container mx-auto px-4 py-8 flex flex-col items-center justify-center">
           <MapPin className="h-16 w-16 text-destructive mb-4" />
           <h1 className="text-3xl font-bold mb-2 text-center">Deal Not Found</h1>
@@ -120,17 +120,19 @@ export default function DealPage({ params }: DealPageProps) {
     );
   }
   
-  // Default to non-discounted price for detail page display
+  // On the detail page, we generally show the base price.
+  // The discount is typically applied at checkout or confirmed via global state.
+  // The DealCard on the dashboard reflects the discount.
   const displayPrice = deal.price;
   const originalDisplayPrice = deal.originalPrice;
 
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <Header onDiscountToggle={handleDiscountToggle} />
+      <Header onDiscountToggle={handleDiscountToggleStub} />
       <main className="flex-grow container mx-auto px-4 py-8">
         <div className="mb-6">
-          <Button asChild variant="outline" size="sm">
+          <Button asChild variant="outline" size="sm" className="hover:bg-accent/10">
             <Link href="/">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to All Deals
@@ -138,45 +140,46 @@ export default function DealPage({ params }: DealPageProps) {
           </Button>
         </div>
 
-        <Card className="overflow-hidden shadow-xl">
+        <Card className="overflow-hidden shadow-xl rounded-xl">
           <div className="grid md:grid-cols-2 gap-0">
-            <div className="relative w-full h-64 md:h-auto min-h-[300px] md:min-h-[400px]">
+            <div className="relative w-full h-72 md:h-auto min-h-[300px] md:min-h-[450px]">
               <Image
-                src={deal.imageUrl.replace('600x400', '800x600')} // Request larger image
+                src={deal.imageUrl.replace('600x400', '800x600')} 
                 alt={deal.destination}
                 layout="fill"
                 objectFit="cover"
                 data-ai-hint={deal.imageHint || "travel destination"}
                 priority
+                className="md:rounded-l-xl"
               />
             </div>
-            <div className="flex flex-col">
+            <div className="flex flex-col bg-card">
               <CardHeader className="pb-4">
                 <div className="flex justify-between items-start">
                     <div>
-                        <Badge variant="secondary" className="capitalize flex items-center gap-1 mb-2">
+                        <Badge variant="secondary" className="capitalize flex items-center gap-1.5 mb-2 text-sm px-3 py-1">
                            <DealTypeIcon type={deal.type} /> {deal.type}
                         </Badge>
-                        <CardTitle className="text-3xl font-headline">{deal.destination}</CardTitle>
+                        <CardTitle className="text-4xl font-headline text-primary">{deal.destination}</CardTitle>
                     </div>
                     {deal.rating && (
-                      <div className="flex items-center gap-1 text-sm bg-amber-400/10 px-2 py-1 rounded-md">
-                        <Star className="h-5 w-5 text-amber-500 fill-amber-500" />
+                      <div className="flex items-center gap-1 text-lg bg-amber-400/10 px-3 py-1.5 rounded-lg">
+                        <Star className="h-6 w-6 text-amber-500 fill-amber-500" />
                         <span className="font-semibold text-amber-600">{deal.rating.toFixed(1)}</span>
                       </div>
                     )}
                 </div>
                  <TypeSpecificDetails deal={deal} />
               </CardHeader>
-              <CardContent className="space-y-4 flex-grow">
-                <div className="grid grid-cols-2 gap-4 text-sm">
+              <CardContent className="space-y-6 flex-grow text-base">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="flex items-center text-muted-foreground">
-                    <CalendarDays className="h-4 w-4 mr-2 text-primary" />
+                    <CalendarDays className="h-5 w-5 mr-2.5 text-primary" />
                     <span>{deal.dates}</span>
                   </div>
                   {deal.duration && (
                     <div className="flex items-center text-muted-foreground">
-                      <Clock className="h-4 w-4 mr-2 text-primary" />
+                      <Clock className="h-5 w-5 mr-2.5 text-primary" />
                       <span>{deal.duration}</span>
                     </div>
                   )}
@@ -184,23 +187,23 @@ export default function DealPage({ params }: DealPageProps) {
                 
                 <Separator />
 
-                <h3 className="font-semibold text-lg text-foreground">About this deal</h3>
+                <h3 className="font-semibold text-xl text-foreground">About this deal</h3>
                 <CardDescription className="text-base leading-relaxed whitespace-pre-line">
                   {deal.description}
                 </CardDescription>
                 
               </CardContent>
-              <CardFooter className="flex flex-col sm:flex-row items-center justify-between pt-6 mt-auto bg-muted/50 p-6">
-                <div className="mb-4 sm:mb-0">
-                  <p className="text-3xl font-bold text-primary">${displayPrice.toFixed(2)}</p>
+              <CardFooter className="flex flex-col sm:flex-row items-center justify-between pt-6 mt-auto bg-muted/30 p-6 border-t">
+                <div className="mb-4 sm:mb-0 text-center sm:text-left">
+                  <p className="text-4xl font-bold text-primary">${displayPrice.toFixed(2)}</p>
                   {originalDisplayPrice && originalDisplayPrice > displayPrice && (
-                    <p className="text-sm text-muted-foreground line-through">${originalDisplayPrice.toFixed(2)}</p>
+                    <p className="text-md text-muted-foreground line-through">${originalDisplayPrice.toFixed(2)}</p>
                   )}
-                   { deal.type === 'hotel' && <span className="text-xs text-muted-foreground ml-1">per night</span> }
+                   { deal.type === 'hotel' && <span className="text-sm text-muted-foreground ml-1">per night</span> }
                 </div>
-                <Button size="lg" className="w-full sm:w-auto bg-accent hover:bg-accent/90 text-accent-foreground">
+                <Button size="lg" className="w-full sm:w-auto bg-accent hover:bg-accent/90 text-accent-foreground text-lg py-3 px-8 rounded-lg">
                   Book Now
-                  <ArrowLeft className="mr-2 h-4 w-4 transform rotate-[135deg] ml-2" /> {/* Simulating an arrow right */}
+                  <ArrowLeft className="mr-2 h-5 w-5 transform rotate-[135deg] ml-2" /> 
                 </Button>
               </CardFooter>
             </div>

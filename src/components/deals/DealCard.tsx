@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { TravelDeal } from "@/types";
-import { Plane, Hotel, MapPin, Star, Tag, Ticket, BriefcaseDollar, Package } from "lucide-react"; // Corrected Briefcase to Package or similar
+import { Plane, Hotel, Star, Tag, Ticket, Package } from "lucide-react"; 
 
 interface DealCardProps {
   deal: TravelDeal;
@@ -17,15 +17,15 @@ const TypeIcon = ({ type }: { type: TravelDeal['type'] }) => {
     case 'flight': return <Plane className="h-4 w-4 text-primary" />;
     case 'hotel': return <Hotel className="h-4 w-4 text-primary" />;
     case 'activity': return <Ticket className="h-4 w-4 text-primary" />;
-    case 'package': return <Package className="h-4 w-4 text-primary" />; // Changed from Briefcase to Package
+    case 'package': return <Package className="h-4 w-4 text-primary" />;
     default: return <Tag className="h-4 w-4 text-primary" />;
   }
 };
 
 
 export function DealCard({ deal, isDiscountApplied }: DealCardProps) {
-  const displayPrice = isDiscountApplied ? deal.price * 0.9 : deal.price;
-  const originalDisplayPrice = isDiscountApplied ? deal.price : deal.originalPrice;
+  const finalPrice = isDiscountApplied ? deal.price * 0.9 : deal.price;
+  const priceToShowAsOriginal = isDiscountApplied ? deal.price : deal.originalPrice;
 
   return (
     <Link href={`/deals/${deal.id}`} passHref legacyBehavior>
@@ -42,6 +42,9 @@ export function DealCard({ deal, isDiscountApplied }: DealCardProps) {
             <Badge variant="secondary" className="absolute top-2 right-2 capitalize flex items-center gap-1">
               <TypeIcon type={deal.type} /> {deal.type}
             </Badge>
+            {isDiscountApplied && (
+              <Badge variant="destructive" className="absolute top-2 left-2">10% OFF</Badge>
+            )}
           </div>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg font-headline truncate">{deal.destination}</CardTitle>
@@ -71,11 +74,11 @@ export function DealCard({ deal, isDiscountApplied }: DealCardProps) {
               </div>
             )}
           </CardContent>
-          <CardFooter className="flex items-center justify-between pt-4">
+          <CardFooter className="flex items-center justify-between pt-4 mt-auto">
             <div>
-              <p className="text-xl font-bold text-primary">${displayPrice.toFixed(2)}</p>
-              {originalDisplayPrice && originalDisplayPrice > displayPrice && (
-                <p className="text-xs text-muted-foreground line-through">${originalDisplayPrice.toFixed(2)}</p>
+              <p className="text-xl font-bold text-primary">${finalPrice.toFixed(2)}</p>
+              {priceToShowAsOriginal && priceToShowAsOriginal > finalPrice && (
+                <p className="text-xs text-muted-foreground line-through">${priceToShowAsOriginal.toFixed(2)}</p>
               )}
             </div>
             <Button size="sm" className="bg-accent hover:bg-accent/90 text-accent-foreground" onClick={(e) => e.stopPropagation()}>Book Now</Button>

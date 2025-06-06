@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -20,7 +21,7 @@ export default function HomePage() {
 
   const handlePreferencesSubmit = async (preferences: UserPreferences) => {
     setIsLoading(true);
-    setDeals([]); // Clear previous deals
+    setDeals([]); 
     try {
       const result = await fetchPersonalizedDeals(preferences);
       if (result.error) {
@@ -42,7 +43,6 @@ export default function HomePage() {
     }
   };
 
-  // Load some initial deals on page load without specific preferences
   useEffect(() => {
     const loadInitialDeals = async () => {
       setIsLoading(true);
@@ -50,7 +50,7 @@ export default function HomePage() {
         const result = await fetchPersonalizedDeals({ 
             destination: "", 
             departureCity: "", 
-            budget: 5000, // High budget to get more initial results
+            budget: 5000, 
             interests: [] 
         });
         if (result.deals) {
@@ -58,7 +58,6 @@ export default function HomePage() {
         }
       } catch (error) {
         console.error("Failed to fetch initial deals:", error);
-        // Optionally show a toast for initial load failure
       } finally {
         setIsLoading(false);
         setInitialLoadComplete(true);

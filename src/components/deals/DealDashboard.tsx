@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo } from "react";
@@ -16,7 +17,7 @@ interface DealDashboardProps {
 }
 
 const initialFilters: DealFilters = {
-  priceRange: [0, 5000], // Default max price, will be updated
+  priceRange: [0, 5000], 
   minRating: 0,
   types: ['flight', 'hotel', 'activity', 'package'],
   sortBy: 'default',
@@ -26,11 +27,10 @@ export function DealDashboard({ deals: initialDeals, isLoading, isDiscountApplie
   const [filters, setFilters] = useState<DealFilters>(initialFilters);
   
   const maxPrice = useMemo(() => {
-    if (initialDeals.length === 0) return 5000; // Default if no deals
+    if (initialDeals.length === 0) return 5000; 
     return Math.max(...initialDeals.map(d => d.price), 5000);
   }, [initialDeals]);
 
-  // Update initialFilters max price if needed, only once
   useState(() => {
     setFilters(prev => ({ ...prev, priceRange: [0, maxPrice]}));
   });
@@ -62,7 +62,6 @@ export function DealDashboard({ deals: initialDeals, isLoading, isDiscountApplie
         processedDeals.sort((a, b) => (b.rating || 0) - (a.rating || 0));
         break;
       default:
-        // No specific sort or maintain original order
         break;
     }
 
@@ -77,7 +76,7 @@ export function DealDashboard({ deals: initialDeals, isLoading, isDiscountApplie
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {Array.from({ length: 6 }).map((_, index) => (
-            <Skeleton key={index} className="h-[380px] w-full rounded-lg" />
+            <Skeleton key={index} className="h-[400px] w-full rounded-lg" /> 
           ))}
         </div>
       </div>
@@ -86,7 +85,7 @@ export function DealDashboard({ deals: initialDeals, isLoading, isDiscountApplie
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-8 items-start">
-      <aside className="sticky top-20"> {/* Adjust top value based on header height */}
+      <aside className="sticky top-20">
         <DealFiltersComponent filters={filters} onFiltersChange={handleFiltersChange} maxPrice={maxPrice} />
       </aside>
       <main>

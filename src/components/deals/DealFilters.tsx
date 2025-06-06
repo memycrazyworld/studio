@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { DealFilters, TravelDeal } from "@/types";
-import { Star, Plane, Hotel, Ticket, Package } from "lucide-react"; // Using Package for package type
+import { Star, Plane, Hotel, Ticket, Package } from "lucide-react"; 
 
 const dealTypeOptions: { value: TravelDeal['type']; label: string; icon: React.ElementType }[] = [
   { value: "flight", label: "Flights", icon: Plane },
@@ -58,8 +59,8 @@ export function DealFiltersComponent({ filters, onFiltersChange, maxPrice }: Dea
   };
 
   return (
-    <div className="space-y-6 p-4 border rounded-lg shadow-sm bg-card">
-      <h3 className="text-lg font-semibold font-headline">Filter Deals</h3>
+    <div className="space-y-6 p-6 border rounded-xl shadow-lg bg-card">
+      <h3 className="text-xl font-semibold font-headline text-primary">Filter Deals</h3>
       
       <div>
         <Label htmlFor="price-range" className="block mb-2 text-sm font-medium">Price Range: ${filters.priceRange[0]} - ${filters.priceRange[1]}</Label>
@@ -70,7 +71,7 @@ export function DealFiltersComponent({ filters, onFiltersChange, maxPrice }: Dea
           step={50}
           value={[filters.priceRange[0], filters.priceRange[1]]}
           onValueChange={handlePriceChange}
-          className="[&>span:first-child]:h-1 [&>span:first-child]:bg-primary/20 [&_[role=slider]]:bg-primary [&_[role=slider]]:h-4 [&_[role=slider]]:w-4 [&_[role=slider]]:border-2"
+          className="[&>span:first-child]:h-1.5 [&>span:first-child]:bg-primary/20 [&_[role=slider]]:bg-primary [&_[role=slider]]:h-4 [&_[role=slider]]:w-4 [&_[role=slider]]:border-2 [&_[role=slider]]:border-primary-foreground"
         />
       </div>
 
@@ -83,23 +84,24 @@ export function DealFiltersComponent({ filters, onFiltersChange, maxPrice }: Dea
           step={0.5}
           value={[filters.minRating]}
           onValueChange={handleRatingChange}
-          className="[&>span:first-child]:h-1 [&>span:first-child]:bg-primary/20 [&_[role=slider]]:bg-primary [&_[role=slider]]:h-4 [&_[role=slider]]:w-4 [&_[role=slider]]:border-2"
+          className="[&>span:first-child]:h-1.5 [&>span:first-child]:bg-primary/20 [&_[role=slider]]:bg-primary [&_[role=slider]]:h-4 [&_[role=slider]]:w-4 [&_[role=slider]]:border-2 [&_[role=slider]]:border-primary-foreground"
         />
       </div>
 
       <div>
         <Label className="block mb-2 text-sm font-medium">Deal Type</Label>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-3">
           {dealTypeOptions.map(opt => {
             const Icon = opt.icon;
             return (
-            <div key={opt.value} className="flex items-center space-x-2">
+            <div key={opt.value} className="flex items-center space-x-2 p-2 rounded-md hover:bg-muted transition-colors">
               <Checkbox
                 id={`type-${opt.value}`}
                 checked={filters.types.includes(opt.value)}
                 onCheckedChange={(checked) => handleTypeChange(opt.value, !!checked)}
+                className="border-primary data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
               />
-              <Label htmlFor={`type-${opt.value}`} className="flex items-center gap-1.5 text-sm font-normal cursor-pointer">
+              <Label htmlFor={`type-${opt.value}`} className="flex items-center gap-1.5 text-sm font-normal cursor-pointer text-foreground">
                 <Icon className="h-4 w-4 text-muted-foreground" />
                 {opt.label}
               </Label>
@@ -110,7 +112,7 @@ export function DealFiltersComponent({ filters, onFiltersChange, maxPrice }: Dea
        <div>
         <Label htmlFor="sort-by" className="block mb-2 text-sm font-medium">Sort By</Label>
         <Select value={filters.sortBy} onValueChange={handleSortChange}>
-          <SelectTrigger id="sort-by">
+          <SelectTrigger id="sort-by" className="focus:ring-primary focus:border-primary">
             <SelectValue placeholder="Sort deals" />
           </SelectTrigger>
           <SelectContent>
@@ -128,11 +130,10 @@ export function DealFiltersComponent({ filters, onFiltersChange, maxPrice }: Dea
           types: ['flight', 'hotel', 'activity', 'package'],
           sortBy: 'default'
         })}
-        className="w-full"
+        className="w-full border-primary text-primary hover:bg-primary/10"
       >
         Reset Filters
       </Button>
     </div>
   );
 }
-
