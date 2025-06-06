@@ -15,12 +15,19 @@ import {
 } from "@/components/ui/select";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, ShoppingCart, Bitcoin, Copy, QrCode } from "lucide-react";
+import { ArrowLeft, ShoppingCart, Copy, QrCode } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { TravelDeal } from "@/types";
 import { fetchDealById } from "@/app/actions";
 import { useToast } from "@/hooks/use-toast";
+
+// Custom Solana icon (simple SVG)
+const SolanaIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path fillRule="evenodd" clipRule="evenodd" d="M6.22569 3.80005H17.7743L15.5081 5.81255H8.4919L6.22569 3.80005ZM2.83501 6.80005H5.22569V8.60005H2.83501V6.80005ZM18.7743 6.80005H21.165V8.60005H18.7743V6.80005ZM9.75811 7.12505L11.9398 5.18755L14.2419 7.12505H9.75811ZM2.83501 9.80005H5.22569V11.6H2.83501V9.80005ZM18.7743 9.80005H21.165V11.6H18.7743V9.80005ZM6.22569 12.8H17.7743L15.5081 14.8125H8.4919L6.22569 12.8ZM2.83501 12.8H5.22569V14.6H2.83501V12.8ZM18.7743 12.8H21.165V14.6H18.7743V12.8ZM9.75811 13.125L11.9398 11.1875L14.2419 13.125H9.75811ZM2.83501 15.8H5.22569V17.6H2.83501V15.8ZM18.7743 15.8H21.165V17.6H18.7743V15.8ZM6.22569 18.8H17.7743L15.5081 20.8125H8.4919L6.22569 18.8ZM9.75811 19.125L11.9398 17.1875L14.2419 19.125H9.75811Z" fill="currentColor"/>
+  </svg>
+);
 
 
 export default function CheckoutPage() {
@@ -30,8 +37,8 @@ export default function CheckoutPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isDiscountApplied, setIsDiscountApplied] = useState(false);
   const { toast } = useToast();
-  const [selectedCrypto, setSelectedCrypto] = useState("UPT");
-  const mockWalletAddress = "0x123abcDEF456ghiJKL789mnoPQR"; // A bit longer for realism
+  const [selectedCrypto, setSelectedCrypto] = useState("USDC-SOL"); // Default to a Solana based token
+  const mockSolanaWalletAddress = "So11111111111111111111111111111111111111112"; 
 
   const handleDiscountToggleStub = (isDiscounted: boolean) => {
     // This is a stub, actual discount logic is managed via localStorage for demo
@@ -54,15 +61,15 @@ export default function CheckoutPage() {
 
   const handleConfirmBooking = () => {
     toast({
-        title: "Crypto Payment Initiated (Simulated)",
+        title: "Solana Payment Initiated (Simulated)",
         description: `Your booking for ${deal?.destination || 'the deal'} for $${finalPrice.toFixed(2)} (payable in ${selectedCrypto}) is processing!`,
     });
   };
 
   const handleCopyAddress = () => {
-    navigator.clipboard.writeText(mockWalletAddress);
+    navigator.clipboard.writeText(mockSolanaWalletAddress);
     toast({
-      title: "Wallet Address Copied!",
+      title: "Solana Wallet Address Copied!",
       description: "You can now paste it into your wallet.",
     });
   };
@@ -159,8 +166,8 @@ export default function CheckoutPage() {
                     </div>
 
                     <Button size="lg" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground text-lg py-3" onClick={handleConfirmBooking}>
-                        <Bitcoin className="mr-2 h-5 w-5" />
-                        Proceed with Crypto Payment
+                        <SolanaIcon />
+                        Proceed with Solana Payment
                     </Button>
                 </CardContent>
             </Card>
@@ -168,47 +175,49 @@ export default function CheckoutPage() {
             <Card className="shadow-xl">
                 <CardHeader>
                     <CardTitle className="text-2xl font-headline text-primary">Crypto Information</CardTitle>
-                    <CardDescription>Please find the crypto transaction details below.</CardDescription>
+                    <CardDescription>Please find the Solana transaction details below.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <div>
-                        <Label htmlFor="cryptoSelect" className="block text-sm font-medium text-muted-foreground mb-2">Select Cryptocurrency</Label>
+                        <Label htmlFor="cryptoSelect" className="block text-sm font-medium text-muted-foreground mb-2">Select Token (Solana Network)</Label>
                         <Select value={selectedCrypto} onValueChange={setSelectedCrypto}>
                             <SelectTrigger id="cryptoSelect" className="w-full">
-                                <SelectValue placeholder="Choose crypto" />
+                                <SelectValue placeholder="Choose token" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="UPT">$UPT (Uprock)</SelectItem>
-                                <SelectItem value="BTC">BTC (Bitcoin)</SelectItem>
-                                <SelectItem value="ETH">ETH (Ethereum)</SelectItem>
+                                <SelectItem value="USDC-SOL">USDC (Solana)</SelectItem>
+                                <SelectItem value="SOL">SOL (Solana)</SelectItem>
+                                <SelectItem value="UPT-SOL">$UPT (Solana)</SelectItem>
+                                <SelectItem value="USDT-SOL">USDT (Solana)</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
 
                     <div>
-                        <Label className="block text-sm font-medium text-muted-foreground mb-1">Send to this Address:</Label>
+                        <Label className="block text-sm font-medium text-muted-foreground mb-1">Send to this Solana Address:</Label>
                         <div className="flex items-center gap-2 p-2.5 border rounded-md bg-input text-sm">
-                            <span className="truncate flex-grow font-mono">{mockWalletAddress}</span>
+                            <span className="truncate flex-grow font-mono">{mockSolanaWalletAddress}</span>
                             <Button variant="ghost" size="sm" onClick={handleCopyAddress} className="shrink-0">
                                 <Copy className="h-4 w-4 mr-1.5" /> Copy
                             </Button>
                         </div>
-                         <p className="text-xs text-muted-foreground mt-1.5">Network: {selectedCrypto === 'BTC' ? 'Bitcoin Network' : selectedCrypto === 'ETH' ? 'Ethereum (ERC20)' : 'Uprock Network (Simulated)'}</p>
+                         <p className="text-xs text-muted-foreground mt-1.5">Network: Solana</p>
                     </div>
 
                     <div className="flex flex-col items-center space-y-2">
                          <Label className="block text-sm font-medium text-muted-foreground">Or Scan QR Code</Label>
                         <div className="p-2 border rounded-md bg-white inline-block">
-                           <Image src={`https://placehold.co/150x150.png`} alt="QR Code Placeholder" width={150} height={150} data-ai-hint="QR code payment" />
+                           {/* Using a generic QR code for Solana */}
+                           <Image src={`https://placehold.co/150x150.png`} alt="Solana QR Code Placeholder" width={150} height={150} data-ai-hint="QR code Solana" />
                         </div>
                     </div>
                      <div>
                         <p className="text-lg font-semibold">Amount Due: <span className="text-primary">${finalPrice.toFixed(2)} USD</span></p>
-                        <p className="text-xs text-muted-foreground">Payable in {selectedCrypto}. Ensure you send the exact equivalent amount for your chosen cryptocurrency.</p>
+                        <p className="text-xs text-muted-foreground">Payable in {selectedCrypto}. Ensure you send the exact equivalent amount for your chosen token on the Solana network.</p>
                     </div>
 
                      <p className="text-xs text-muted-foreground mt-4 text-center">
-                        This is a simulated crypto payment process. No real transaction will occur. Always double-check addresses and network compatibility in real transactions.
+                        This is a simulated Solana payment process. No real transaction will occur. Always double-check addresses and network compatibility in real transactions.
                     </p>
                 </CardContent>
             </Card>
@@ -219,3 +228,5 @@ export default function CheckoutPage() {
     </div>
   );
 }
+
+    
