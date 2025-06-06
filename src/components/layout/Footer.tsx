@@ -16,8 +16,13 @@ export function Footer() {
             Ahmed Shaban
           </a>
           <span className="mx-2">&bull;</span>
-          Powered by Uprock 
-          <span className="inline-block ml-1 px-1.5 py-0.5 text-xs bg-muted rounded align-middle">[Uprock Logo]</span>
+          Powered by Uprock{' '}
+          <span 
+            className="inline-block align-middle ml-1 px-2 py-1 text-xs bg-muted rounded border border-border text-muted-foreground tracking-wider"
+            title="Uprock Logo Placeholder"
+          >
+            UPROCK
+          </span>
         </p>
       </div>
     </footer>
