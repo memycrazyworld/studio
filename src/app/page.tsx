@@ -11,7 +11,7 @@ import { fetchPersonalizedDeals } from "./actions";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button"; // Added for potential CTA
+import { Button } from "@/components/ui/button"; 
 
 export default function HomePage() {
   const [deals, setDeals] = useState<TravelDeal[]>([]);
@@ -82,7 +82,7 @@ export default function HomePage() {
           style={{ backgroundImage: "url('https://placehold.co/1920x1080.png')" }}
           data-ai-hint="tropical beach"
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30 md:to-transparent z-0"></div> {/* Adjusted gradient for better coverage */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30 md:via-black/40 md:to-transparent z-0"></div>
 
           <div className="relative z-10 container px-4 mx-auto w-full">
             <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
@@ -94,11 +94,6 @@ export default function HomePage() {
                 <p className="text-lg sm:text-xl text-neutral-200 mb-8 md:mb-10 max-w-xl md:max-w-none mx-auto md:mx-0">
                   Craft your dream vacation. WanderWeb's AI curates personalized travel deals, just for you.
                 </p>
-                {/* Optional: Example of a CTA button if needed later
-                <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground hidden md:inline-flex">
-                  Explore Destinations
-                </Button>
-                */}
               </div>
 
               {/* Right Column: Form Card */}
