@@ -67,7 +67,7 @@ export default function DealPage() {
 
   useEffect(() => {
     async function loadDeal() {
-      if (id) { // Ensure id is available
+      if (id) { 
         const fetchedDeal = await fetchDealById(id);
         setDeal(fetchedDeal || null);
       }
@@ -77,7 +77,7 @@ export default function DealPage() {
         const discountStatus = localStorage.getItem("discountApplied") === "true";
         setIsDiscountApplied(discountStatus);
     }
-  }, [id]); // Correctly using 'id' from useParams in the dependency array
+  }, [id]); 
 
   const handleDiscountToggle = (isDiscounted: boolean) => {
     setIsDiscountApplied(isDiscounted);
@@ -148,7 +148,7 @@ export default function DealPage() {
                 alt={deal.destination}
                 layout="fill"
                 objectFit="cover"
-                data-ai-hint={deal.imageHint || "travel destination"}
+                data-ai-hint={deal.imageHint || "travel experience"}
                 priority
                 className="md:rounded-l-xl"
               />

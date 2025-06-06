@@ -40,7 +40,7 @@ const mockDeals: TravelDeal[] = [
   },
    {
     id: "7", type: "package", destination: "Cancun, Mexico", price: 950, dates: "Feb 10 - Feb 17", rating: 4.7,
-    imageUrl: "https://placehold.co/800x600.png", imageHint: "Cancun beach", description: "Relax at an all-inclusive resort in Cancun with flights and transfers. Enjoy beautiful beaches, crystal-clear waters, and exciting nightlife.",
+    imageUrl: "https://placehold.co/800x600.png", imageHint: "Cancun resort", description: "Relax at an all-inclusive resort in Cancun with flights and transfers. Enjoy beautiful beaches, crystal-clear waters, and exciting nightlife.",
     duration: "7 Days"
   },
   {
@@ -52,7 +52,7 @@ const mockDeals: TravelDeal[] = [
 
 export async function fetchPersonalizedDeals(
   preferences: UserPreferences
-): Promise<{ deals?: TravelDeal[]; error?: string }> {
+): Promise<{ deals?: TravelDeal[]; error?: string, dealIdsFromAI?: string[] }> {
   await delay(1500);
   console.log("Fetching deals with preferences:", preferences);
 
@@ -63,13 +63,13 @@ export async function fetchPersonalizedDeals(
       userPreferences: `Seeking deals for ${preferences.destination || 'anywhere'}. Budget around $${preferences.budget}. Interests: ${preferences.interests.join(', ') || 'general travel'}. Departure from ${preferences.departureCity || 'any city'}. Travel dates around ${preferences.startDate ? preferences.startDate.toLocaleDateString() : 'flexible'} to ${preferences.endDate ? preferences.endDate.toLocaleDateString() : 'flexible'}.`,
     };
 
-    console.log("AI Input:", JSON.stringify(aiInput, null, 2));
+    console.log("AI Input for personalizeDealRecommendations:", JSON.stringify(aiInput, null, 2));
 
     const result = await personalizeDealRecommendations(aiInput);
     
-    console.log("AI Output:", result);
+    console.log("AI Output from personalizeDealRecommendations:", result);
 
-    if (result.dealIds && result.dealIds.length > 0) {
+    if (result.dealIds && Array.isArray(result.dealIds) && result.dealIds.length > 0) {
       const personalizedDeals = result.dealIds
         .map(id => mockDeals.find(deal => deal.id === id))
         .filter((deal): deal is TravelDeal => deal !== undefined);
@@ -77,11 +77,11 @@ export async function fetchPersonalizedDeals(
       // Add some non-AI deals to make the list longer for demo purposes if AI returns few
       if (personalizedDeals.length < 5 && mockDeals.length > personalizedDeals.length) {
           const additionalDealsCount = Math.min(5 - personalizedDeals.length, mockDeals.length - personalizedDeals.length);
-          const aiDealIds = new Set(personalizedDeals.map(d => d.id));
-          const additionalDeals = mockDeals.filter(d => !aiDealIds.has(d.id)).slice(0, additionalDealsCount);
-          return { deals: [...personalizedDeals, ...additionalDeals] };
+          const aiDealIdsSet = new Set(personalizedDeals.map(d => d.id));
+          const additionalDeals = mockDeals.filter(d => !aiDealIdsSet.has(d.id)).slice(0, additionalDealsCount);
+          return { deals: [...personalizedDeals, ...additionalDeals], dealIdsFromAI: result.dealIds };
       }
-      return { deals: personalizedDeals };
+      return { deals: personalizedDeals, dealIdsFromAI: result.dealIds };
     } else {
       // Fallback to simple filtering if AI returns no specific deals or an error occurs in parsing
       console.log("AI did not return specific deal IDs, or an error occurred. Using fallback filtering.");

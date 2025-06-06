@@ -136,7 +136,7 @@ export default function CheckoutPage() {
                         alt={deal.destination}
                         layout="fill"
                         objectFit="cover"
-                        data-ai-hint={deal.imageHint || "travel checkout"}
+                        data-ai-hint={deal.imageHint || "travel destination"}
                         />
                         {isDiscountApplied && (
                             <div className="absolute top-2 right-2 bg-destructive text-destructive-foreground px-3 py-1 text-sm font-semibold rounded-md">
@@ -208,7 +208,7 @@ export default function CheckoutPage() {
                          <Label className="block text-sm font-medium text-muted-foreground">Or Scan QR Code</Label>
                         <div className="p-2 border rounded-md bg-white inline-block">
                            {/* Using a generic QR code for Solana */}
-                           <Image src={`https://placehold.co/150x150.png`} alt="Solana QR Code Placeholder" width={150} height={150} data-ai-hint="QR code Solana" />
+                           <Image src="https://placehold.co/150x150.png" alt="Solana QR Code Placeholder" width={150} height={150} data-ai-hint="QR Solana" />
                         </div>
                     </div>
                      <div>
@@ -228,5 +228,3 @@ export default function CheckoutPage() {
     </div>
   );
 }
-
-    

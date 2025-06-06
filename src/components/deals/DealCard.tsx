@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { TravelDeal } from "@/types";
-import { Plane, Hotel, Star, Tag, Ticket, Package, Briefcase, ArrowRight } from "lucide-react"; 
+import { Plane, Hotel, Star, Tag, Ticket, Package as PackageIcon, ArrowRight } from "lucide-react"; 
 
 interface DealCardProps {
   deal: TravelDeal;
@@ -17,7 +17,7 @@ const TypeIcon = ({ type }: { type: TravelDeal['type'] }) => {
     case 'flight': return <Plane className="h-4 w-4 text-primary" />;
     case 'hotel': return <Hotel className="h-4 w-4 text-primary" />;
     case 'activity': return <Ticket className="h-4 w-4 text-primary" />;
-    case 'package': return <Package className="h-4 w-4 text-primary" />;
+    case 'package': return <PackageIcon className="h-4 w-4 text-primary" />;
     default: return <Tag className="h-4 w-4 text-primary" />;
   }
 };
@@ -38,7 +38,7 @@ export function DealCard({ deal, isDiscountApplied }: DealCardProps) {
                 alt={deal.destination}
                 layout="fill"
                 objectFit="cover"
-                data-ai-hint={deal.imageHint || "travel landscape"}
+                data-ai-hint={deal.imageHint || "travel scene"}
               />
               <Badge variant="secondary" className="absolute top-2 right-2 capitalize flex items-center gap-1">
                 <TypeIcon type={deal.type} /> {deal.type}
@@ -95,4 +95,3 @@ export function DealCard({ deal, isDiscountApplied }: DealCardProps) {
    
   );
 }
-
